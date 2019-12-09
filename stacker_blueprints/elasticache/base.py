@@ -9,6 +9,7 @@ from troposphere.elasticache import (
 from troposphere.route53 import RecordSetType
 
 from stacker.blueprints.base import Blueprint
+from stacker.blueprints.variables.types import TroposphereType
 
 # Resource name constants
 SUBNET_GROUP = "SubnetGroup"
@@ -120,10 +121,10 @@ class BaseReplicationGroup(Blueprint):
             "default": ""
         },
         "Tags": {
-            "type": dict,
-            "description": "A list of cost allocation tags to be added to this "
-                           "resource.",
-            "default": {}
+            "type": TroposphereType(Tags, optional=True),
+            "description": "A list of cost allocation tags to be added to "
+                           "this resource.",
+            "default": None
         },
         "InternalZoneId": {
             "type": str,
@@ -230,28 +231,32 @@ class BaseReplicationGroup(Blueprint):
         maintenance_window = variables["PreferredMaintenanceWindow"] or \
             NOVALUE
 
+        replication_group_args = {
+            "AutomaticFailoverEnabled": variables["AutomaticFailoverEnabled"],
+            "AutoMinorVersionUpgrade": variables["AutoMinorVersionUpgrade"],
+            "CacheNodeType": variables["CacheNodeType"],
+            "CacheParameterGroupName": Ref(PARAMETER_GROUP),
+            "CacheSubnetGroupName": Ref(SUBNET_GROUP),
+            "NumCacheClusters": variables["NumCacheClusters"],
+            "Engine": self.engine(),
+            "EngineVersion": variables["EngineVersion"],
+            "NotificationTopicArn": notification_topic_arn,
+            "Port": port,
+            "PreferredCacheClusterAZs": availability_zones,
+            "PreferredMaintenanceWindow": maintenance_window,
+            "ReplicationGroupDescription": self.name,
+            "SecurityGroupIds": [Ref(SECURITY_GROUP), ],
+            "SnapshotArns": snapshot_arns,
+            "SnapshotRetentionLimit": snapshot_retention_limit,
+            "SnapshotWindow": snapshot_window
+        }
+
+        tags = variables['Tags']
+        if tags:
+            replication_group_args['Tags'] = tags
+
         t.add_resource(
-            ReplicationGroup(
-                REPLICATION_GROUP,
-                AutomaticFailoverEnabled=variables["AutomaticFailoverEnabled"],
-                AutoMinorVersionUpgrade=variables["AutoMinorVersionUpgrade"],
-                CacheNodeType=variables["CacheNodeType"],
-                CacheParameterGroupName=Ref(PARAMETER_GROUP),
-                CacheSubnetGroupName=Ref(SUBNET_GROUP),
-                NumCacheClusters=variables["NumCacheClusters"],
-                Engine=self.engine(),
-                EngineVersion=variables["EngineVersion"],
-                NotificationTopicArn=notification_topic_arn,
-                Port=port,
-                PreferredCacheClusterAZs=availability_zones,
-                PreferredMaintenanceWindow=maintenance_window,
-                ReplicationGroupDescription=self.name,
-                SecurityGroupIds=[Ref(SECURITY_GROUP), ],
-                SnapshotArns=snapshot_arns,
-                SnapshotRetentionLimit=snapshot_retention_limit,
-                SnapshotWindow=snapshot_window,
-                Tags=Tags(variables['Tags']),
-            )
+            ReplicationGroup(REPLICATION_GROUP, **replication_group_args)
         )
 
     def get_primary_address(self):

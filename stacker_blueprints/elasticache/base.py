@@ -1,5 +1,5 @@
 from troposphere import (
-    Ref, ec2, Output, GetAtt, Join
+    Ref, ec2, Output, GetAtt, Join, Tags
 )
 
 from troposphere.elasticache import (
@@ -118,6 +118,12 @@ class BaseReplicationGroup(Blueprint):
                            "taking a daily snapshot of your node group. "
                            "For example, you can specify 05:00-09:00.",
             "default": ""
+        },
+        "Tags": {
+            "type": dict,
+            "description": "A list of cost allocation tags to be added to this "
+                           "resource.",
+            "default": {}
         },
         "InternalZoneId": {
             "type": str,
@@ -244,6 +250,7 @@ class BaseReplicationGroup(Blueprint):
                 SnapshotArns=snapshot_arns,
                 SnapshotRetentionLimit=snapshot_retention_limit,
                 SnapshotWindow=snapshot_window,
+                Tags=Tags(variables['Tags']),
             )
         )
 

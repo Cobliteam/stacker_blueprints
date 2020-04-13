@@ -47,24 +47,6 @@ class TestElasticFileSystem(BlueprintTestCase):
     def setUp(self):
         self.ctx = Context({'namespace': 'test'})
 
-    def test_create_template_with_subnets(self):
-        blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
-        variables = EFS_VARIABLES.copy()
-        variables.update(SUBNETS)
-        blueprint.resolve_variables(
-            [Variable(k, v) for k, v in variables.items()])
-        blueprint.create_template()
-        self.assertRenderedBlueprint(blueprint)
-
-    def test_create_template_with_subnet_str(self):
-        blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
-        variables = EFS_VARIABLES.copy()
-        variables.update(SUBNETS_STR)
-        blueprint.resolve_variables(
-            [Variable(k, v) for k, v in variables.items()])
-        blueprint.create_template()
-        self.assertRenderedBlueprint(blueprint)
-
     def test_validate_security_group_count_empty(self):
         blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
         variables = EFS_VARIABLES.copy()

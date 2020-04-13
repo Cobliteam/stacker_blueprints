@@ -10,14 +10,16 @@ from stacker_blueprints.util import merge_tags
 
 class ElasticFileSystem(Blueprint):
     VARIABLES = {
+        'FileSystem': {
+            'type': TroposphereType(efs.FileSystem),
+            'description': 'A dictionary of the FileSystem to create. The key '
+                           'being the CFN logical resource name, the '
+                           'value being a dictionary of attributes for '
+                           'the troposphere efs.FileSystem type.',
+        },
         'VpcId': {
             'type': str,
             'description': 'VPC ID to create resources'
-        },
-        'PerformanceMode': {
-            'type': str,
-            'description': 'The performance mode of the file system',
-            'default': 'generalPurpose'
         },
         'Tags': {
             'type': dict,
@@ -121,11 +123,12 @@ class ElasticFileSystem(Blueprint):
         t = self.template
         v = self.get_variables()
 
-        fs = t.add_resource(efs.FileSystem(
-            'EfsFileSystem',
-            FileSystemTags=Tags(v['Tags']),
-            PerformanceMode=v['PerformanceMode']))
+        fs = v.get('FileSystem')
 
+        # This is a major hack to inkect extra tags in efs resources
+        fs.FileSystemTags = merge_tags(v['Tags'], getattr(fs, 'Tags', {}))
+
+        fs = t.add_resource(fs)
         t.add_output(Output(
             'EfsFileSystemId',
             Value=Ref(fs)))

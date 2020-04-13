@@ -2,7 +2,9 @@
 
 efs_variables: &efs_variables
   VpcId: 'vpc-11111111'
-  PerformanceMode: 'generalPurpose'
+  FileSystem:
+    EfsFileSystem:
+      PerformanceMode: 'generalPurpose'
   Tags:
     Hello: 'World'
   Subnets:

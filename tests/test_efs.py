@@ -10,7 +10,11 @@ from stacker_blueprints.efs import ElasticFileSystem
 
 EFS_VARIABLES = {
     'VpcId': 'vpc-11111111',
-    'PerformanceMode': 'generalPurpose',
+    'FileSystem': {
+      'EfsFileSystem': {
+        'PerformanceMode': 'generalPurpose'
+      }
+    },
     'Tags': {
         'Hello': 'World'
     },

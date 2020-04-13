@@ -18,7 +18,6 @@ EFS_VARIABLES = {
     'Tags': {
         'Hello': 'World'
     },
-    'Subnets': ['subnet-11111111', 'subnet-22222222'],
     'IpAddresses': ['172.16.1.10', '172.16.2.10'],
     'SecurityGroups': {
         'EfsSg1': {
@@ -40,14 +39,27 @@ EFS_VARIABLES = {
     'ExtraSecurityGroups': ['sg-22222222', 'sg-33333333']
 }
 
+SUBNETS = {'Subnets': ['subnet-11111111', 'subnet-22222222']}
+SUBNETS_STR = {'SubnetsStr': 'subnet-11111111,subnet-22222222'}
+
 
 class TestElasticFileSystem(BlueprintTestCase):
     def setUp(self):
         self.ctx = Context({'namespace': 'test'})
 
-    def test_create_template(self):
+    def test_create_template_with_subnets(self):
         blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
-        variables = EFS_VARIABLES
+        variables = EFS_VARIABLES.copy()
+        variables.update(SUBNETS)
+        blueprint.resolve_variables(
+            [Variable(k, v) for k, v in variables.items()])
+        blueprint.create_template()
+        self.assertRenderedBlueprint(blueprint)
+
+    def test_create_template_with_subnet_str(self):
+        blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
+        variables = EFS_VARIABLES.copy()
+        variables.update(SUBNETS_STR)
         blueprint.resolve_variables(
             [Variable(k, v) for k, v in variables.items()])
         blueprint.create_template()
@@ -63,19 +75,28 @@ class TestElasticFileSystem(BlueprintTestCase):
             blueprint.resolve_variables(
                 [Variable(k, v) for k, v in variables.items()])
 
-    def test_validate_security_group_count_exceeded(self):
-        blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
-        variables = EFS_VARIABLES.copy()
-        variables['ExtraSecurityGroups'] = ['sg-22222222'] * 4
-
-        with self.assertRaises(ValidatorError):
-            blueprint.resolve_variables(
-                [Variable(k, v) for k, v in variables.items()])
-
     def test_validate_subnets_empty(self):
         blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
         variables = EFS_VARIABLES.copy()
         variables['Subnets'] = []
+        variables['SubnetsStr'] = ''
+        with self.assertRaises(ValidatorError):
+            blueprint.resolve_variables(
+                [Variable(k, v) for k, v in variables.items()])
+
+    def test_validate_subnets_both(self):
+        blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
+        variables = EFS_VARIABLES.copy()
+        variables.update(SUBNETS)
+        variables.update(SUBNETS_STR)
+        with self.assertRaises(ValidatorError):
+            blueprint.resolve_variables(
+                [Variable(k, v) for k, v in variables.items()])
+
+    def test_validate_security_group_count_exceeded(self):
+        blueprint = ElasticFileSystem('test_efs_ElasticFileSystem', self.ctx)
+        variables = EFS_VARIABLES.copy()
+        variables['ExtraSecurityGroups'] = ['sg-22222222'] * 4
 
         with self.assertRaises(ValidatorError):
             blueprint.resolve_variables(

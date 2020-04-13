@@ -1,5 +1,5 @@
 from troposphere import ec2, efs
-from troposphere import Join, Output, Ref, Tags
+from troposphere import Join, Output, Ref
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import TroposphereType
@@ -28,7 +28,19 @@ class ElasticFileSystem(Blueprint):
         },
         'Subnets': {
             'type': list,
-            'description': 'List of subnets to deploy private mount targets in'
+            'description': 'List of subnets to deploy private mount targets '
+                           'in. Can not be used together with SubnetsStr. You'
+                           'must choose only one way to inform this parameter',
+
+            'default': []
+        },
+        'SubnetsStr': {
+            'type': str,
+            'description': 'A comma sepparated list of subnets to deploy '
+                           'private mount targets in. Can not be used in '
+                           'addition to Subnets, you must choose only one way'
+                           'to inform this parameter',
+            'default': ''
         },
         'IpAddresses': {
             'type': list,
@@ -62,6 +74,15 @@ class ElasticFileSystem(Blueprint):
         }
     }
 
+    def get_subnets_from_string_list(self):
+        v = self.get_variables()
+
+        def check_empty_string(value):
+            return value != ''
+
+        subnets = v['SubnetsStr'].split(',')
+        return filter(check_empty_string, subnets)
+
     def validate_efs_security_groups(self):
         validator = '{}.{}'.format(type(self).__name__,
                                    'validate_efs_security_groups')
@@ -82,13 +103,27 @@ class ElasticFileSystem(Blueprint):
         v = self.get_variables()
 
         subnet_count = len(v['Subnets'])
-        if not subnet_count:
+        subnet_str_count = len(self.get_subnets_from_string_list())
+        if not subnet_count and not subnet_str_count:
+            variables = {
+                'Subnets': v['Subnets'],
+                'SubnetsStr': v['SubnetsStr']
+            }
             raise ValidatorError(
-                'Subnets', validator, v['Subnets'],
-                'At least one Subnet must be provided')
+                'Subnets', validator,  variables,
+                'At least one Subnet or SubnetStr must be provided')
+
+        if subnet_count and subnet_str_count:
+            variables = {
+                'Subnets': v['Subnets'],
+                'SubnetsStr': v['SubnetsStr']
+            }
+            raise ValidatorError(
+                'Subnets and SubnetsStr', validator,  variables,
+                'Only one of Subnet or SubnetStr can be provided')
 
         ip_count = len(v['IpAddresses'])
-        if ip_count and ip_count != subnet_count:
+        if ip_count and ip_count != max(subnet_count, subnet_str_count):
             raise ValidatorError(
                 'IpAddresses', validator, v['IpAddresses'],
                 'The number of IpAddresses must match the number of Subnets')
@@ -125,7 +160,7 @@ class ElasticFileSystem(Blueprint):
 
         fs = v.get('FileSystem')
 
-        # This is a major hack to inkect extra tags in efs resources
+        # This is a major hack to inject extra tags in efs resources
         fs.FileSystemTags = merge_tags(v['Tags'], getattr(fs, 'Tags', {}))
 
         fs = t.add_resource(fs)
@@ -140,7 +175,9 @@ class ElasticFileSystem(Blueprint):
         v = self.get_variables()
 
         groups = self.prepare_efs_security_groups()
-        subnets = v['Subnets']
+
+        subnets = self.get_subnets_from_string_list()
+        subnets += v['Subnets']
         ips = v['IpAddresses']
 
         mount_targets = []

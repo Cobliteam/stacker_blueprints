@@ -7,15 +7,19 @@ efs_variables: &efs_variables
       PerformanceMode: 'generalPurpose'
   Tags:
     Hello: 'World'
-  Subnets:
-    - 'subnet-11111111'
-    - 'subnet-22222222'
   IpAddresses:
     - '172.16.1.10'
     - '172.16.2.10'
   ExtraSecurityGroups:
     - 'sg-22222222'
     - 'sg-33333333'
+
+
+Subnets: &subnets
+  - 'subnet-11111111'
+  - 'subnet-22222222'
+
+SubnetsStr: &subnets_str 'subnet-33333333,subnet-44444444'
 
 security_group_1: &security_group_1
   EfsSg1:
@@ -41,10 +45,19 @@ security_group_2: &security_group_2
 
 namespace: test
 stacks:
-  - name: efs
+  - name: efs_with_subnets
     class_path: stacker_blueprints.efs.ElasticFileSystem
     variables:
       << : *efs_variables
+      Subnets: *subnets
+      SecurityGroups:
+        <<: *security_group_1
+        <<: *security_group_2
+  - name: efs_with_subnets_str
+    class_path: stacker_blueprints.efs.ElasticFileSystem
+    variables:
+      << : *efs_variables
+      SubnetsStr: *subnets_str
       SecurityGroups:
         <<: *security_group_1
         <<: *security_group_2

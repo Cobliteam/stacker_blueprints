@@ -139,7 +139,7 @@ class ElasticFileSystem(Blueprint):
         v = self.get_variables()
 
         created_groups = []
-        for sg in v['SecurityGroups']:
+        for sg in v['SecurityGroups'] or {}:
             sg.VpcId = v['VpcId']
             sg.Tags = merge_tags(v['Tags'], getattr(sg, 'Tags', {}))
 

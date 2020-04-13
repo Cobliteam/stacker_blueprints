@@ -1,0 +1,63 @@
+---
+
+efs_variables: &efs_variables
+  VpcId: 'vpc-11111111'
+  FileSystem:
+    EfsFileSystem:
+      PerformanceMode: 'generalPurpose'
+  Tags:
+    Hello: 'World'
+  IpAddresses:
+    - '172.16.1.10'
+    - '172.16.2.10'
+  ExtraSecurityGroups:
+    - 'sg-22222222'
+    - 'sg-33333333'
+
+
+Subnets: &subnets
+  - 'subnet-11111111'
+  - 'subnet-22222222'
+
+SubnetsStr: &subnets_str 'subnet-33333333,subnet-44444444'
+
+security_group_1: &security_group_1
+  EfsSg1:
+    GroupDescription: 'EFS SG 1'
+    SecurityGroupIngress:
+      - IpProtocol: 'tcp'
+        FromPort: 2049
+        ToPort: 2049
+        CidrIp: '172.16.0.0/12'
+    Tags:
+      - Key: 'Foo'
+        Value: 'Bar'
+
+security_group_2: &security_group_2
+  EfsSg2:
+    GroupDescription: 'EFS SG 2'
+    SecurityGroupIngress:
+      - IpProtocol: 'tcp'
+        FromPort: 2049
+        ToPort: 2049
+        SourceSecurityGroupId: 'sg-11111111'
+
+
+namespace: test
+stacks:
+  - name: efs_with_subnets
+    class_path: stacker_blueprints.efs.ElasticFileSystem
+    variables:
+      << : *efs_variables
+      Subnets: *subnets
+      SecurityGroups:
+        <<: *security_group_1
+        <<: *security_group_2
+  - name: efs_with_subnets_str
+    class_path: stacker_blueprints.efs.ElasticFileSystem
+    variables:
+      << : *efs_variables
+      SubnetsStr: *subnets_str
+      SecurityGroups:
+        <<: *security_group_1
+        <<: *security_group_2

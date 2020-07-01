@@ -1,0 +1,134 @@
+{
+    "Outputs": {
+        "AvailabilityZone": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Subnet",
+                    "AvailabilityZone"
+                ]
+            }
+        },
+        "CidrBlock": {
+            "Value": "10.0.0.0/24"
+        },
+        "DefaultRouteId": {
+            "Value": {
+                "Ref": "DefaultRoute"
+            }
+        },
+        "Ipv6CidrBlocks": {
+            "Value": {
+                "Fn::Join": [
+                    ",",
+                    {
+                        "Fn::GetAtt": [
+                            "Subnet",
+                            "Ipv6CidrBlocks"
+                        ]
+                    }
+                ]
+            }
+        },
+        "NetworkAclAssociationId": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Subnet",
+                    "NetworkAclAssociationId"
+                ]
+            }
+        },
+        "NetworkType": {
+            "Value": "public"
+        },
+        "Route1": {
+            "Value": {
+                "Ref": "Route1"
+            }
+        },
+        "RouteTableId": {
+            "Value": {
+                "Ref": "RouteTable"
+            }
+        },
+        "SubnetId": {
+            "Value": {
+                "Ref": "Subnet"
+            }
+        },
+        "SubnetRouteTableAssociationId": {
+            "Value": {
+                "Ref": "SubnetRouteTableAssociation"
+            }
+        },
+        "VpcId": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Subnet",
+                    "VpcId"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "DefaultRoute": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": "gw-abc1234z",
+                "NatGatewayId": {
+                    "Ref": "AWS::NoValue"
+                },
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "Route1": {
+            "Properties": {
+                "DestinationCidrBlock": "127.127.127.127/32",
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "VpcPeeringConnectionId": "pcx-abcde123456789000"
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "RouteTable": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "NetworkType",
+                        "Value": "public"
+                    }
+                ],
+                "VpcId": "vpcabc1234"
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "Subnet": {
+            "Properties": {
+                "AvailabilityZone": "us-east-1a",
+                "CidrBlock": "10.0.0.0/24",
+                "Tags": [
+                    {
+                        "Key": "NetworkType",
+                        "Value": "public"
+                    }
+                ],
+                "VpcId": "vpcabc1234"
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "SubnetRouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "Subnet"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        }
+    }
+}

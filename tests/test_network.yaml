@@ -1,0 +1,68 @@
+---
+
+
+class_path: &class_path stacker_blueprints.network.Network
+common_variables: &common_variables
+  VpcId: 'vpcabc1234'
+  VpcDefaultSecurityGroup: 'sg-01234abc'
+  AvailabilityZone: 'us-east-1a'
+  CidrBlock: '10.0.0.0/24'
+
+
+route_1: &route_1
+  DestinationCidrBlock: "127.127.127.127/32"
+  VpcPeeringConnectionId: "pcx-abcde123456789000"
+
+route_2: &route_2
+  DestinationCidrBlock: "127.127.127.128/32"
+  VpcPeeringConnectionId: "pcx-abcde123456789001"
+
+namespace: test
+stacks:
+  - name: network_public_without_extra_routes
+    class_path: *class_path
+    variables:
+      << : *common_variables
+      InternetGatewayId: 'gw-abc1234z'
+  - name: network_public_with_single_route
+    class_path: *class_path
+    variables:
+      << : *common_variables
+      InternetGatewayId: 'gw-abc1234z'
+      Routes:
+        Route1:
+          <<: *route_1
+  - name: network_public_with_multiple_routes
+    class_path: *class_path
+    variables:
+      << : *common_variables
+      InternetGatewayId: 'gw-abc1234z'
+      Routes:
+        Route1:
+          <<: *route_1
+        Route2:
+          <<: *route_2
+
+  - name: network_private_without_extra_routes
+    class_path: *class_path
+    variables:
+      << : *common_variables
+      NatGatewayId: 'nat-abc1234z'
+  - name: network_private_with_single_route
+    class_path: *class_path
+    variables:
+      << : *common_variables
+      NatGatewayId: 'nat-abc1234z'
+      Routes:
+        Route1:
+          <<: *route_1
+  - name: network_private_with_multiple_routes
+    class_path: *class_path
+    variables:
+      << : *common_variables
+      NatGatewayId: 'nat-abc1234z'
+      Routes:
+        Route1:
+          <<: *route_1
+        Route2:
+          <<: *route_2

@@ -1,3 +1,4 @@
+from stacker.blueprints.variables.types import TroposphereType
 from troposphere import (
     Join,
     NoValue,
@@ -7,6 +8,13 @@ from troposphere import (
 from troposphere import ec2
 
 from stacker.blueprints.base import Blueprint
+
+
+class _Route(ec2.Route):
+    props = ec2.Route.props
+    props.update({
+        'RouteTableId': (basestring, False),
+    })
 
 
 class Network(Blueprint):
@@ -53,6 +61,13 @@ class Network(Blueprint):
                            "resources that accept tags.",
             "default": {},
         },
+        "Routes": {
+            "type": TroposphereType(ec2.Route, many=True),
+            "description": "A list of dictionary of ec2.Routes but without "
+                           "RouteTableId to create in the default route "
+                           "table.",
+            "default": {},
+        },
     }
 
     @property
@@ -88,6 +103,10 @@ class Network(Blueprint):
         tag_dict.update(variables["Tags"])
         tags = Tags(**tag_dict)
         return tags
+
+    @property
+    def routes(self):
+        return self.get_variables()["Routes"]
 
     def create_subnet(self):
         t = self.template
@@ -207,6 +226,14 @@ class Network(Blueprint):
 
         t.add_output(Output("DefaultRouteId", Value=self.default_route.Ref()))
 
+    def create_extra_routes(self):
+        t = self.template
+        for route in self.routes:
+            title = route.title
+            route.properties.update({"RouteTableId": self.route_table.Ref()})
+            added_route = t.add_resource(route)
+            t.add_output(Output(title, Value=added_route.Ref()))
+
     def validate_variables(self):
         variables = self.get_variables()
         if (self.internet_gateway_id is not NoValue and
@@ -225,3 +252,4 @@ class Network(Blueprint):
         self.create_route_table()
         self.create_nat_gateway()
         self.create_default_route()
+        self.create_extra_routes()

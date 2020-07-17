@@ -1,0 +1,27 @@
+{
+    "Outputs": {
+        "ClusterWithRequiredPropertiesArn": {
+            "Value": {
+                "Ref": "ClusterWithRequiredProperties"
+            }
+        }
+    },
+    "Resources": {
+        "ClusterWithRequiredProperties": {
+            "Properties": {
+                "BrokerNodeGroupInfo": {
+                    "ClientSubnets": [
+                        "subnet-abc09876",
+                        "subnet-def54321",
+                        "subnet-cdb5678"
+                    ],
+                    "InstanceType": "kafka.m5.large"
+                },
+                "ClusterName": "ClusterWithRequiredProperties",
+                "KafkaVersion": "2.2.1",
+                "NumberOfBrokerNodes": 3
+            },
+            "Type": "AWS::MSK::Cluster"
+        }
+    }
+}

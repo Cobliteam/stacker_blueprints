@@ -1,6 +1,6 @@
 {
     "Outputs": {
-        "testCluster": {
+        "testClusterArn": {
             "Value": {
                 "Ref": "testCluster"
             }

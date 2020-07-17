@@ -31,4 +31,4 @@ class Cluster(Blueprint):
         clusters = v.get('Clusters')
         for cluster in clusters:
             t.add_resource(cluster)
-            t.add_output(Output(cluster.title, Value=Ref(cluster)))
+            t.add_output(Output(cluster.title + 'Arn', Value=Ref(cluster)))

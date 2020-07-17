@@ -1,6 +1,6 @@
 {
     "Outputs": {
-        "ClusterWithAllProperties": {
+        "ClusterWithAllPropertiesArn": {
             "Value": {
                 "Ref": "ClusterWithAllProperties"
             }

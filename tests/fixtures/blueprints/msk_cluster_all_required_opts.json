@@ -60,20 +60,11 @@
                         }
                     }
                 },
-                "Tags": [
-                    {
-                        "Key": "MyKey1",
-                        "Value": "myValue1"
-                    },
-                    {
-                        "Key": "MyKey2",
-                        "Value": "myValue2"
-                    },
-                    {
-                        "Key": "MyKey3",
-                        "Value": "myValue3"
-                    }
-                ]
+                "Tags": {
+                    "MyKey1": "myValue1",
+                    "MyKey2": "myValue2",
+                    "MyKey3": "myValue3"
+                }
             },
             "Type": "AWS::MSK::Cluster"
         }

@@ -10,7 +10,7 @@ class _Cluster(msk.Cluster):
     """
     props = msk.Cluster.props
     props.update({
-        'Tags': ((Tags, list), False)
+        'Tags': ((Tags, dict), False)
     })
 
 

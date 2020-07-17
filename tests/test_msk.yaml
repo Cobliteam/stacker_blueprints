@@ -9,12 +9,9 @@ definitions:
       - subnet-cdb5678
   cluster_tags: &cluster_tags
     Tags:
-      - Key: MyKey1
-        Value: myValue1
-      - Key: MyKey2
-        Value: myValue2
-      - Key: MyKey3
-        Value: myValue3
+      MyKey1: myValue1
+      MyKey2: myValue2
+      MyKey3: myValue3
   configuration_info: &configuration_info
     ConfigurationInfo:
       Arn: arn:aws:kafka:us-east-1:000000000011:configuration/ConfigName/abcdef0-1234-5678-9abc-0123456789ab-2

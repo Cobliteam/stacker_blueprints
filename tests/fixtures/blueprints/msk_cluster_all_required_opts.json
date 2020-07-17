@@ -1,0 +1,81 @@
+{
+    "Outputs": {
+        "ClusterWithAllProperties": {
+            "Value": {
+                "Ref": "ClusterWithAllProperties"
+            }
+        }
+    },
+    "Resources": {
+        "ClusterWithAllProperties": {
+            "Properties": {
+                "BrokerNodeGroupInfo": {
+                    "BrokerAZDistribution": "DEFAULT",
+                    "ClientSubnets": [
+                        "subnet-abc09876",
+                        "subnet-def54321",
+                        "subnet-cdb5678"
+                    ],
+                    "InstanceType": "kafka.m5.large",
+                    "SecurityGroups": [
+                        "sg-abcdef0123456789a"
+                    ],
+                    "StorageInfo": {
+                        "EBSStorageInfo": {
+                            "VolumeSize": 100
+                        }
+                    }
+                },
+                "ClientAuthentication": {
+                    "Tls": {
+                        "CertificateAuthorityArnList": [
+                            "ReplaceWithCAArn"
+                        ]
+                    }
+                },
+                "ClusterName": "ClusterWithAllProperties",
+                "ConfigurationInfo": {
+                    "Arn": "arn:aws:kafka:us-east-1:000000000011:configuration/ConfigName/abcdef0-1234-5678-9abc-0123456789ab-2",
+                    "Revision": 1
+                },
+                "EncryptionInfo": {
+                    "EncryptionAtRest": {
+                        "DataVolumeKMSKeyId": "ReplaceWithKmsKeyArn"
+                    },
+                    "EncryptionInTransit": {
+                        "ClientBroker": "TLS",
+                        "InCluster": "true"
+                    }
+                },
+                "EnhancedMonitoring": "PER_BROKER",
+                "KafkaVersion": "2.2.1",
+                "NumberOfBrokerNodes": 3,
+                "OpenMonitoring": {
+                    "Prometheus": {
+                        "JmxExporter": {
+                            "EnabledInBroker": "true"
+                        },
+                        "NodeExporter": {
+                            "EnabledInBroker": "true"
+                        }
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "MyKey1",
+                        "Value": "myValue1"
+                    },
+                    {
+                        "Key": "MyKey2",
+                        "Value": "myValue2"
+                    },
+                    {
+                        "Key": "MyKey3",
+                        "Value": "myValue3"
+                    }
+                ]
+            },
+            "Type": "AWS::MSK::Cluster"
+        }
+    }
+}

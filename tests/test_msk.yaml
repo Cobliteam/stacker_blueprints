@@ -1,0 +1,97 @@
+namespace: test
+
+definitions:
+  class_path: &class_path stacker_blueprints.msk.Cluster
+  client_subnets: &client_subnets
+    ClientSubnets:
+      - subnet-abc09876
+      - subnet-def54321
+      - subnet-cdb5678
+  cluster_tags: &cluster_tags
+    Tags:
+      - Key: MyKey1
+        Value: myValue1
+      - Key: MyKey2
+        Value: myValue2
+      - Key: MyKey3
+        Value: myValue3
+  configuration_info: &configuration_info
+    ConfigurationInfo:
+      Arn: arn:aws:kafka:us-east-1:000000000011:configuration/ConfigName/abcdef0-1234-5678-9abc-0123456789ab-2
+      Revision: 1
+  security_groups: &security_groups
+    SecurityGroups:
+      - sg-abcdef0123456789a
+
+stacks:
+  - name: msk_cluster_base
+    class_path: *class_path
+    variables:
+      Clusters:
+        testCluster:
+          BrokerNodeGroupInfo:
+            BrokerAZDistribution: DEFAULT
+            <<: *client_subnets
+            InstanceType: kafka.m5.xlarge
+            <<: *security_groups
+            StorageInfo:
+              EBSStorageInfo:
+                VolumeSize: 800
+          ClusterName: test-kafka
+          <<: *configuration_info
+          EncryptionInfo:
+            EncryptionInTransit:
+              ClientBroker: TLS_PLAINTEXT
+              InCluster: false
+          EnhancedMonitoring: PER_TOPIC_PER_BROKER
+          KafkaVersion: 1.1.1
+          NumberOfBrokerNodes: 3
+          <<: *cluster_tags
+
+  - name: msk_cluster_with_required_opts
+    class_path: *class_path
+    variables:
+      Clusters:
+        ClusterWithRequiredProperties:
+          ClusterName: ClusterWithRequiredProperties
+          KafkaVersion: 2.2.1
+          NumberOfBrokerNodes: 3
+          BrokerNodeGroupInfo:
+            InstanceType: kafka.m5.large
+            <<: *client_subnets
+
+  - name: msk_cluster_all_required_opts
+    class_path: *class_path
+    variables:
+      Clusters:
+        ClusterWithAllProperties:
+          ClusterName: ClusterWithAllProperties
+          KafkaVersion: 2.2.1
+          NumberOfBrokerNodes: 3
+          EnhancedMonitoring: PER_BROKER
+          EncryptionInfo:
+            EncryptionAtRest:
+              DataVolumeKMSKeyId: ReplaceWithKmsKeyArn
+            EncryptionInTransit:
+              ClientBroker: TLS
+              InCluster: true
+          OpenMonitoring:
+            Prometheus:
+              JmxExporter:
+                EnabledInBroker: "true"
+              NodeExporter:
+                EnabledInBroker: "true"
+          <<: *configuration_info
+          ClientAuthentication:
+            Tls:
+              CertificateAuthorityArnList:
+                - ReplaceWithCAArn
+          <<: *cluster_tags
+          BrokerNodeGroupInfo:
+            BrokerAZDistribution: DEFAULT
+            InstanceType: kafka.m5.large
+            <<: *security_groups
+            StorageInfo:
+              EBSStorageInfo:
+                VolumeSize: 100
+            <<: *client_subnets

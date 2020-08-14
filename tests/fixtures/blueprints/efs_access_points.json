@@ -1,0 +1,41 @@
+{
+    "Outputs": {
+        "FirstAccessPointArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "FirstAccessPoint",
+                    "Arn"
+                ]
+            }
+        },
+        "FirstAccessPointId": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "FirstAccessPoint",
+                    "AccessPointId"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "FirstAccessPoint": {
+            "Properties": {
+                "AccessPointTags": [],
+                "FileSystemId": "fs-11111111",
+                "PosixUser": {
+                    "Gid": "1000",
+                    "Uid": "1000"
+                },
+                "RootDirectory": {
+                    "CreationInfo": {
+                        "OwnerGid": "1000",
+                        "OwnerUid": "1000",
+                        "Permissions": "755"
+                    },
+                    "Path": "/data"
+                }
+            },
+            "Type": "AWS::EFS::AccessPoint"
+        }
+    }
+}

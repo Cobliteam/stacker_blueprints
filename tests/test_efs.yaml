@@ -14,6 +14,8 @@ efs_variables: &efs_variables
     - 'sg-22222222'
     - 'sg-33333333'
 
+  efs_id: &efs_id fs-11111111
+
 
 Subnets: &subnets
   - 'subnet-11111111'
@@ -61,3 +63,22 @@ stacks:
       SecurityGroups:
         <<: *security_group_1
         <<: *security_group_2
+
+  - name: efs_access_points
+    class_path: stacker_blueprints.efs.AccessPoints
+    variables:
+      AccessPoints:
+        FirstAccessPoint:
+          AccessPointTags:
+            - Key: 'Tag1'
+              Value: 'Value1'
+          FileSystemId: *efs_id
+          PosixUser:
+            Uid: '1000'
+            Gid: '1000'
+          RootDirectory:
+            Path: '/data'
+            CreationInfo:
+              OwnerGid: '1000'
+              OwnerUid: '1000'
+              Permissions: '755'

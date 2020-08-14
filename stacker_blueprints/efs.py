@@ -1,5 +1,5 @@
 from troposphere import ec2, efs
-from troposphere import Join, Output, Ref
+from troposphere import Tags, Join, Output, Ref, GetAtt
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import TroposphereType
@@ -201,3 +201,49 @@ class ElasticFileSystem(Blueprint):
     def create_template(self):
         fs = self.create_efs_filesystem()
         self.create_efs_mount_targets(fs)
+
+
+class _AccessPoint(efs.AccessPoint):
+    """Class to replace Tags property, since original troposphere type does not
+    accept a list of tags
+    """
+    props = efs.AccessPoint.props
+    props.update({
+        'AccessPointTags': ((Tags, list), False)
+    })
+
+
+class AccessPoints(Blueprint):
+    VARIABLES = {
+        'AccessPoints': {
+            'type': TroposphereType(_AccessPoint, many=True),
+            'description': 'A dictionary of the AccessPoints to create. The '
+                           'key being the CFN logical resource name, the '
+                           'value being a dictionary of attributes for '
+                           'the troposphere efs.FileSystem type.',
+        },
+        'Tags': {
+            'type': dict,
+            'description': 'Tags to associate with the created resources',
+            'default': {}
+        }
+    }
+
+    def create_template(self):
+        t = self.template
+        v = self.get_variables()
+
+        access_points = v.get('AccessPoints')
+        tags = v.get('Tags')
+
+        for ap in access_points:
+            # This is a major hack to inject extra tags in resources
+            ap.AccessPointTags = merge_tags(tags, getattr(ap, 'Tags', {}))
+            ap_name = ap.name
+            ap = t.add_resource(ap)
+            t.add_output(Output(
+                '{}Id'.format(ap_name),
+                Value=GetAtt(ap, 'AccessPointId')))
+            t.add_output(Output(
+                '{}Arn'.format(ap_name),
+                Value=GetAtt(ap, 'Arn')))

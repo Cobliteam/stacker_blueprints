@@ -64,7 +64,7 @@ stacks:
         <<: *security_group_1
         <<: *security_group_2
 
-  - name: access_points
+  - name: efs_access_points
     class_path: stacker_blueprints.efs.AccessPoints
     variables:
       AccessPoints:

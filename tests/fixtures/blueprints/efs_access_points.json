@@ -32,7 +32,7 @@
                         "OwnerUid": "1000",
                         "Permissions": "755"
                     },
-                    "Path": "/data/"
+                    "Path": "/data"
                 }
             },
             "Type": "AWS::EFS::AccessPoint"

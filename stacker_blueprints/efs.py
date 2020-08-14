@@ -1,5 +1,5 @@
 from troposphere import ec2, efs
-from troposphere import Join, Output, Ref, GetAtt
+from troposphere import Tags, Join, Output, Ref, GetAtt
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import TroposphereType
@@ -203,10 +203,20 @@ class ElasticFileSystem(Blueprint):
         self.create_efs_mount_targets(fs)
 
 
+class _AccessPoint(efs.AccessPoint):
+    """Class to replace Tags property, since original troposphere type does not
+    accept a list of tags
+    """
+    props = efs.AccessPoint.props
+    props.update({
+        'AccessPointTags': ((Tags, list), False)
+    })
+
+
 class AccessPoints(Blueprint):
     VARIABLES = {
         'AccessPoints': {
-            'type': TroposphereType(efs.AccessPoint, many=True),
+            'type': TroposphereType(_AccessPoint, many=True),
             'description': 'A dictionary of the AccessPoints to create. The '
                            'key being the CFN logical resource name, the '
                            'value being a dictionary of attributes for '

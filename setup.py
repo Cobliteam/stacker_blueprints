@@ -6,7 +6,7 @@ src_dir = os.path.dirname(__file__)
 install_requires = [
     "python-dateutil<3.0.0",
     "stacker>=1.7.0",
-    "troposphere>=2.3.2",
+    "troposphere>=2.6.2",
     "awacs>=0.8.2",
 ]
 
